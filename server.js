@@ -10,8 +10,8 @@ const server = express()
 server.use(express.json()) // built-in middleware
 
 server.use(helmet()) // third-party  middleware
-
-// server.use("/api/projects", logger, projectRouter)
+server.use(logger)
+server.use("/api/projects", logger, projectRouter)
 // server.use("/api/actions", logger, actionRouter)
 
 server.get("/", logger, (req, res) => {
