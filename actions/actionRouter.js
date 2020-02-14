@@ -1,5 +1,6 @@
 const express = require("express")
 const Data = require("../data/helpers/actionModel")
+const project = require("../data/helpers/projectModel")
 const actionRouter = express.Router()
 
 // GET list of actions
@@ -16,14 +17,39 @@ actionRouter.get("/:id", (req, res) => {
   Data.get(id)
     .then(actions =>
       actions.length === 0
-        ? res
-            .status(404)
-            .json({
-              message: "The action with the specified ID does not exist",
-              error: error
-            }) & console.log(actions)
+        ? res.status(404).json({
+            message: "The action with the specified ID does not exist",
+            error: error
+          }) & console.log(actions)
         : res.status(200).json(actions)
     )
     .catch()
 })
+
+// POST add new action
+
+// DELETE remove action
+actionRouter.delete("/:id", (req, res) => {
+  const { id } = req.params
+
+  Data.remove(id)
+    .then(action => res.status(200).json(action))
+    .catch(error => res.status(400).json({ error: "Bad request" }))
+})
+
+// Middleware
+// ValidateProjectByID
+function validateProjectById(req, res, next) {
+  const { id } = req.params
+  Data.get(id)
+    .then(project =>
+      project !== null
+        ? (req.project = project) & next()
+        : res.status(404).json({ errorMessage: "Project not found" })
+    )
+    .catch(error =>
+      res.status(500).json({ errorMessage: "Internal server error" })
+    )
+}
+
 module.exports = actionRouter
