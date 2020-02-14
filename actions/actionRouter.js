@@ -27,6 +27,18 @@ actionRouter.get("/:id", (req, res) => {
 })
 
 // POST add new action
+actionRouter.post("/", validateAction, validateProjectById, (req, res) => {
+  Data.insert(req.body)
+    .then(res => res.status(201).json({ message: res }))
+    .catch(error => res.status(400).json({ error: "Bad post request" }))
+})
+
+// PUT request to update
+actionRouter.put("/:id", validateAction, validateProjectById, (req, res) => {
+  Data.update(req.params.id, req.body)
+    .then(res => res.status(200).json({ message: res }))
+    .catch(error => res.status(400).json({ error: "bad put request" }))
+})
 
 // DELETE remove action
 actionRouter.delete("/:id", (req, res) => {
@@ -52,4 +64,31 @@ function validateProjectById(req, res, next) {
     )
 }
 
+// Middleware
+// ValidateAction
+function validateAction(req, res, next) {
+  // do your magic!
+  const { id } = req.params
+  req.action = req.body
+
+  !req.action
+    ? res.status(400).json({ error: "no action" })
+    : !req.action.project_id || !req.action.notes || !req.action.description
+    ? res.status(400).json({ message: "missing action data" })
+    : console.log(req.action, "TEST") & next()
+}
+
+// ValidateProjectByID
+function validateProjectById(req, res, next) {
+  const { project_id } = req.body
+  Data.get(project_id)
+    .then(project =>
+      project !== null
+        ? (req.project = project) & next()
+        : res.status(404).json({ errorMessage: "Project not found" })
+    )
+    .catch(error =>
+      res.status(500).json({ errorMessage: "Internal server error" })
+    )
+}
 module.exports = actionRouter

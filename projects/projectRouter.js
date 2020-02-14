@@ -54,7 +54,7 @@ projectRouter.delete("/:id", (req, res) => {
 })
 
 // Middleware
-// ValidateProjectBy
+// ValidateProjectByID
 function validateProjectById(req, res, next) {
   const { id } = req.params
   Data.get(id)
